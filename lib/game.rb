@@ -34,28 +34,30 @@ class Game
 
   def betting_round
     @round_players.each do |player|
-      handle_response(player.take_bet)
+      break if player == @last_raiser
+      handle_response(player, player.take_bet)
+      next_player!
     end
   end
 
-  def handle_response(bet_move)
+  def handle_response(player, bet_move)
     case bet_move
     when :fold
-      fold
+      fold(player)
     when :call
-      call
+      call(player)
     end
-    raise_bet(bet_move)
+    raise_bet(player, bet_move)
   end
 
-  def next_player!
-    if @current_player == @round_players[-1]
-      @current_player = @round_players.first
-    else
-    @round_players.each_with_index do |player, idx|
-      @current_player = player if @round_players[idx-1] == @current_player
-    end
-  end
+  # def next_player!
+  #   if @current_player == @round_players[-1]
+  #     @current_player = @round_players.first
+  #   else
+  #   @round_players.each_with_index do |player, idx|
+  #     @current_player = player if @round_players[idx-1] == @current_player
+  #   end
+  # end
 
   def swapping_round
 
@@ -71,20 +73,25 @@ class Game
 
   private
 
-  def fold
+  def fold(player)
     @round_players.delete(@current_player)
   end
 
-  def call
+  def call(player)
     bet = @last_raiser.bet - @current_player.bet
     @pot += bet
-    @current_player.bet += bet
-    @current_player.cash -= bet
+    player.bet += bet
+    player.cash -= bet
   end
 
-  def raise_bet(bet_move)
-    @last_raiser = @current_player
+  def raise_bet(player, bet_move)
+    @pot += bet_move
+    player.bet += bet_move
+    player.cash -= bet_move
+    @last_raiser = player
   end
+  
+  private
 
   def players_dry?
     @players.count{ |player| player.pot == 0} == 3
