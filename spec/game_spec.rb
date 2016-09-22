@@ -10,6 +10,9 @@ subject(:game) {Game.new(players)}
   describe "#initialize" do
     it "intializes with array of players, empty pot, current player and players in round" do
       expect(game.players).to eq(players)
+      expect(game.current_player).to eq(:player1)
+      expect(game.pot).to eq(0)
+      expect(game.in_round_players).to eq(players)
     end
   end
 
@@ -46,6 +49,11 @@ subject(:game) {Game.new(players)}
       expect(game.min_bet).to eq(10)
       expect(game.pot).to eq(15)
 
+    end
+
+    it "returns if theres only one player that hasn't folded" do
+      game.in_round_players = [player1]
+      expect(game.betting_round).to eq(nil)
     end
   end
 
